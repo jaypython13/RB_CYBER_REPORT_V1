@@ -8,7 +8,7 @@ st.set_page_config(page_title="RB Cyber Health Check", layout="wide")
 st.title("RB Cyber Health Check Report Generator")
 
 # Always use this bundled logo file
-RB_LOGO_PATH = os.path.join("assets", "RB_logo.jpg")
+RB_LOGO_PATH = os.path.join("RB_logo.jpg")
 if not os.path.exists(RB_LOGO_PATH):
     st.error("RB logo not found. Please add it at: assets/RB_logo.jpg")
     st.stop()
