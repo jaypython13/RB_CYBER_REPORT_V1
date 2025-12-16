@@ -7,7 +7,7 @@ st.set_page_config(page_title="RB Cyber Health Check", layout="wide")
 st.title("RB Cyber Health Check Report Generator")
 
 # Put your logo in your repo at: assets/RB_logo.jpg
-DEFAULT_LOGO_PATH = os.path.join("assets", "RB_logo.jpg")
+DEFAULT_LOGO_PATH = os.path.join("RB_logo.jpg")
 
 with st.sidebar:
     st.header("Report Inputs")
