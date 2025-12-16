@@ -1,3 +1,4 @@
+# report_builder.py
 from __future__ import annotations
 
 import io
@@ -27,6 +28,9 @@ from reportlab.pdfgen import canvas
 # Robust JSON loading
 # -----------------------------
 def _strip_to_json(text: str) -> str:
+    """
+    Some exports include comment headers. We parse from first '{'.
+    """
     i = text.find("{")
     if i == -1:
         raise ValueError("No JSON object found in input text.")
@@ -34,6 +38,10 @@ def _strip_to_json(text: str) -> str:
 
 
 def _normalize_extended_json(obj: Any) -> Any:
+    """
+    Handles extended JSON formats like:
+      {"$date": "..."} or {"$numberLong": "..."}
+    """
     if isinstance(obj, dict):
         if "$date" in obj and len(obj) == 1:
             return obj["$date"]
@@ -81,7 +89,7 @@ def _status_color(status: str) -> colors.Color:
 def build_findings(hibp: Dict[str, Any], ssl: Dict[str, Any]) -> List[Finding]:
     findings: List[Finding] = []
 
-    # 1) HIBP
+    # 1) Account compromise (HIBP)
     hibp_summary = hibp.get("summary", {})
     breaches_found = int(hibp_summary.get("breaches_found", 0) or 0)
     pastes_found = int(hibp_summary.get("pastes_found", 0) or 0)
@@ -119,7 +127,7 @@ def build_findings(hibp: Dict[str, Any], ssl: Dict[str, Any]) -> List[Finding]:
         )
     )
 
-    # 2) SSL Labs
+    # 2) Website encryption (SSL Labs)
     grade = ssl.get("grade") or "N/A"
     domain = ssl.get("domain") or ssl.get("raw", {}).get("host") or "N/A"
     ip_addr = ssl.get("ip_address") or "N/A"
@@ -143,7 +151,7 @@ def build_findings(hibp: Dict[str, Any], ssl: Dict[str, Any]) -> List[Finding]:
     details_obj = (ep0.get("details") or {}) if isinstance(ep0, dict) else {}
 
     protocols = details_obj.get("protocols") or []
-    protocol_names = []
+    protocol_names: List[str] = []
     for p in protocols:
         if isinstance(p, dict):
             protocol_names.append(f"{p.get('name', 'TLS')} {p.get('version', '')}".strip())
@@ -169,7 +177,7 @@ def build_findings(hibp: Dict[str, Any], ssl: Dict[str, Any]) -> List[Finding]:
         )
     )
 
-    # 3) Legacy TLS check
+    # 3) Legacy TLS (1.0/1.1)
     has_tls10 = any("1.0" in x for x in protocol_names)
     has_tls11 = any("1.1" in x for x in protocol_names)
     legacy = has_tls10 or has_tls11
@@ -225,7 +233,7 @@ def _draw_header_footer(
             c.drawImage(
                 logo,
                 20 * mm,
-                height - 22 * mm,     # top-left area
+                height - 22 * mm,
                 width=28 * mm,
                 height=14 * mm,
                 preserveAspectRatio=True,
@@ -234,7 +242,7 @@ def _draw_header_footer(
         except Exception:
             pass
 
-    # Right-side header text
+    # Header text (right)
     c.setFont("Helvetica", 10)
     c.drawRightString(width - 20 * mm, height - 15 * mm, report_title)
     c.setFont("Helvetica", 9)
@@ -247,6 +255,9 @@ def _draw_header_footer(
     c.drawRightString(width - 20 * mm, 12 * mm, f"Page {doc.page}")
 
 
+# -----------------------------
+# PDF generator
+# -----------------------------
 def generate_pdf_bytes(
     business_name: str,
     email: str,
@@ -279,7 +290,7 @@ def generate_pdf_bytes(
 
     story: List[Any] = []
 
-    # Cover (logo appears via header too, but we keep clean cover layout)
+    # Cover
     story.append(Spacer(1, 25 * mm))
     story.append(Paragraph("Cyber Health Check Report", styles["H1"]))
     story.append(Paragraph(business_name, styles["H1"]))
@@ -325,33 +336,74 @@ def generate_pdf_bytes(
     )
     story.append(PageBreak())
 
-    # High-Level Findings
+    # -------------------------------------------------------
+    # High-Level Findings (FIXED: wrapped text + alignment)
+    # -------------------------------------------------------
     story.append(Paragraph("High-Level Report Findings", styles["H2"]))
 
-    hl_rows = [["#", "Test", "Result", "Headline", "Summary"]]
-    for f in findings:
-        hl_rows.append([str(f.number), f.title, f.status, f.headline, f.summary])
-
-    hl = Table(hl_rows, colWidths=[10 * mm, 45 * mm, 18 * mm, 25 * mm, 70 * mm])
-    hl_style = [
-        ("FONT", (0, 0), (-1, 0), "Helvetica-Bold", 10),
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#E0E0E0")),
-        ("FONT", (0, 1), (-1, -1), "Helvetica", 9),
-        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#FAFAFA")]),
-        ("TOPPADDING", (0, 0), (-1, -1), 6),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+    hl_rows = [
+        [
+            Paragraph("<b>#</b>", styles["Body"]),
+            Paragraph("<b>Test</b>", styles["Body"]),
+            Paragraph("<b>Result</b>", styles["Body"]),
+            Paragraph("<b>Headline</b>", styles["Body"]),
+            Paragraph("<b>Summary</b>", styles["Body"]),
+        ]
     ]
-    for i, f in enumerate(findings, start=1):
-        hl_style.append(("TEXTCOLOR", (2, i), (2, i), _status_color(f.status)))
-        hl_style.append(("FONT", (2, i), (2, i), "Helvetica-Bold", 9))
 
-    hl.setStyle(TableStyle(hl_style))
+    for f in findings:
+        hl_rows.append(
+            [
+                Paragraph(str(f.number), styles["Body"]),
+                Paragraph(f.title, styles["Body"]),
+                Paragraph(
+                    f"<font color='{_status_color(f.status).hexval()}'><b>{f.status}</b></font>",
+                    styles["Body"],
+                ),
+                Paragraph(f.headline, styles["Body"]),
+                Paragraph(f.summary, styles["Body"]),
+            ]
+        )
+
+    hl = Table(
+        hl_rows,
+        colWidths=[
+            10 * mm,  # #
+            40 * mm,  # Test
+            18 * mm,  # Result
+            28 * mm,  # Headline
+            64 * mm,  # Summary
+        ],
+        repeatRows=1,
+    )
+
+    hl.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#E0E0E0")),
+                ("FONT", (0, 0), (-1, 0), "Helvetica-Bold", 10),
+
+                ("FONT", (0, 1), (-1, -1), "Helvetica", 9),
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("ALIGN", (0, 0), (0, -1), "CENTER"),  # #
+                ("ALIGN", (2, 1), (2, -1), "CENTER"),  # Result
+
+                ("LEFTPADDING", (0, 0), (-1, -1), 6),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+                ("TOPPADDING", (0, 0), (-1, -1), 6),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#FAFAFA")]),
+            ]
+        )
+    )
+
     story.append(hl)
     story.append(PageBreak())
 
-    # Detailed pages
+    # Aim and Importance
     story.append(Paragraph("Aim and Importance", styles["H2"]))
     story.append(
         Paragraph(
@@ -362,6 +414,7 @@ def generate_pdf_bytes(
     )
     story.append(PageBreak())
 
+    # Detailed Findings
     for f in findings:
         story.append(Paragraph(f"{f.number}. {f.title}", styles["H2"]))
         story.append(
@@ -376,8 +429,7 @@ def generate_pdf_bytes(
         story.append(Spacer(1, 6 * mm))
 
         detail_table = Table(
-            [["Metric", "Value"]]
-            + [[k, v] for (k, v) in f.details],
+            [["Metric", "Value"]] + [[k, v] for (k, v) in f.details],
             colWidths=[55 * mm, 105 * mm],
         )
         detail_table.setStyle(
@@ -390,6 +442,8 @@ def generate_pdf_bytes(
                     ("VALIGN", (0, 0), (-1, -1), "TOP"),
                     ("TOPPADDING", (0, 0), (-1, -1), 6),
                     ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 6),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 6),
                 ]
             )
         )
@@ -406,6 +460,7 @@ def generate_pdf_bytes(
         )
     )
 
+    # Page callbacks
     def on_page(c: canvas.Canvas, d):
         _draw_header_footer(
             c=c,
