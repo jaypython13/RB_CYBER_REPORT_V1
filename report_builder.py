@@ -1,0 +1,420 @@
+from __future__ import annotations
+
+import io
+import json
+from dataclasses import dataclass
+from datetime import date
+from typing import Any, Dict, List, Optional, Tuple
+
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import mm
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.utils import ImageReader
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph,
+    Spacer,
+    Table,
+    TableStyle,
+    PageBreak,
+    KeepTogether,
+)
+from reportlab.pdfgen import canvas
+
+
+# -----------------------------
+# Robust JSON loading
+# -----------------------------
+def _strip_to_json(text: str) -> str:
+    i = text.find("{")
+    if i == -1:
+        raise ValueError("No JSON object found in input text.")
+    return text[i:]
+
+
+def _normalize_extended_json(obj: Any) -> Any:
+    if isinstance(obj, dict):
+        if "$date" in obj and len(obj) == 1:
+            return obj["$date"]
+        if "$numberLong" in obj and len(obj) == 1:
+            try:
+                return int(obj["$numberLong"])
+            except Exception:
+                return obj["$numberLong"]
+        return {k: _normalize_extended_json(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_normalize_extended_json(x) for x in obj]
+    return obj
+
+
+def load_json_from_text(text: str) -> Dict[str, Any]:
+    raw = _strip_to_json(text)
+    data = json.loads(raw)
+    return _normalize_extended_json(data)
+
+
+# -----------------------------
+# Findings model
+# -----------------------------
+@dataclass
+class Finding:
+    number: int
+    title: str
+    status: str  # PASS / RISK / N/A
+    headline: str
+    summary: str
+    details: List[Tuple[str, str]]
+
+
+def _status_color(status: str) -> colors.Color:
+    if status == "PASS":
+        return colors.HexColor("#2E7D32")
+    if status == "RISK":
+        return colors.HexColor("#C62828")
+    return colors.HexColor("#616161")
+
+
+# -----------------------------
+# Build findings from your files
+# -----------------------------
+def build_findings(hibp: Dict[str, Any], ssl: Dict[str, Any]) -> List[Finding]:
+    findings: List[Finding] = []
+
+    # 1) HIBP
+    hibp_summary = hibp.get("summary", {})
+    breaches_found = int(hibp_summary.get("breaches_found", 0) or 0)
+    pastes_found = int(hibp_summary.get("pastes_found", 0) or 0)
+    is_pwned = bool(hibp_summary.get("is_pwned", False))
+
+    breaches = [
+        b.get("Name")
+        for b in (hibp.get("raw", {}).get("breaches") or [])
+        if isinstance(b, dict)
+    ]
+    breaches = [x for x in breaches if x]
+
+    status = "RISK" if is_pwned else "PASS"
+    headline = "Bad News!" if is_pwned else "Great News!"
+    summary = (
+        "Our dark web research indicates your email address "
+        f"{'has' if is_pwned else 'has not'} been recorded as part of "
+        f"{'one or more' if is_pwned else 'any'} data breaches."
+    )
+
+    findings.append(
+        Finding(
+            number=1,
+            title="Account compromise",
+            status=status,
+            headline=headline,
+            summary=summary,
+            details=[
+                ("Email", str(hibp.get("email", "N/A"))),
+                ("Breaches found", str(breaches_found)),
+                ("Pastes found", str(pastes_found)),
+                ("Breaches", ", ".join(breaches) if breaches else "None"),
+                ("Scan date", str(hibp.get("scanned_at", "N/A"))),
+            ],
+        )
+    )
+
+    # 2) SSL Labs
+    grade = ssl.get("grade") or "N/A"
+    domain = ssl.get("domain") or ssl.get("raw", {}).get("host") or "N/A"
+    ip_addr = ssl.get("ip_address") or "N/A"
+    scanned_at = ssl.get("scanned_at") or "N/A"
+
+    if grade in ("A+", "A"):
+        status = "PASS"
+        headline = "Great News!"
+        summary = "Our research indicates your website has a strong TLS configuration."
+    elif grade == "N/A":
+        status = "N/A"
+        headline = "N/A"
+        summary = "No SSL Labs grade was available in the provided data."
+    else:
+        status = "RISK"
+        headline = "Bad News!"
+        summary = "Our research indicates your website TLS grade is below A, which may increase exposure to attack."
+
+    endpoints = (ssl.get("raw", {}) or {}).get("endpoints") or []
+    ep0 = endpoints[0] if endpoints else {}
+    details_obj = (ep0.get("details") or {}) if isinstance(ep0, dict) else {}
+
+    protocols = details_obj.get("protocols") or []
+    protocol_names = []
+    for p in protocols:
+        if isinstance(p, dict):
+            protocol_names.append(f"{p.get('name', 'TLS')} {p.get('version', '')}".strip())
+    protocol_list = ", ".join(protocol_names) if protocol_names else "N/A"
+
+    findings.append(
+        Finding(
+            number=2,
+            title="Website encryption",
+            status=status,
+            headline=headline,
+            summary=summary,
+            details=[
+                ("Domain", domain),
+                ("IP address", ip_addr),
+                ("Overall grade", str(grade)),
+                ("Supported protocols", protocol_list),
+                ("BEAST vulnerability flag", str(details_obj.get("vulnBeast")) if details_obj.get("vulnBeast") is not None else "N/A"),
+                ("OCSP stapling", str(details_obj.get("ocspStapling")) if details_obj.get("ocspStapling") is not None else "N/A"),
+                ("RC4 supported", str(details_obj.get("supportsRc4")) if details_obj.get("supportsRc4") is not None else "N/A"),
+                ("Scan date", str(scanned_at)),
+            ],
+        )
+    )
+
+    # 3) Legacy TLS check
+    has_tls10 = any("1.0" in x for x in protocol_names)
+    has_tls11 = any("1.1" in x for x in protocol_names)
+    legacy = has_tls10 or has_tls11
+
+    if not protocol_names:
+        status = "N/A"
+        headline = "N/A"
+        summary = "No protocol information was available in the provided data."
+    else:
+        status = "RISK" if legacy else "PASS"
+        headline = "Bad News!" if legacy else "Great News!"
+        summary = (
+            "Our research indicates your website supports legacy TLS versions (1.0/1.1), which can reduce transport security."
+            if legacy
+            else "Our research indicates your website does not advertise legacy TLS 1.0/1.1 support."
+        )
+
+    findings.append(
+        Finding(
+            number=3,
+            title="Website encryption downgrade (legacy TLS)",
+            status=status,
+            headline=headline,
+            summary=summary,
+            details=[
+                ("TLS 1.0 supported", str(has_tls10) if protocol_names else "N/A"),
+                ("TLS 1.1 supported", str(has_tls11) if protocol_names else "N/A"),
+                ("Supported protocols", protocol_list),
+            ],
+        )
+    )
+
+    return findings
+
+
+# -----------------------------
+# Header/footer with RB logo (top-left)
+# -----------------------------
+def _draw_header_footer(
+    c: canvas.Canvas,
+    doc,
+    report_title: str,
+    classification: str,
+    last_reviewed: str,
+    logo_path: Optional[str],
+):
+    width, height = A4
+
+    # Logo on top-left of every page
+    if logo_path:
+        try:
+            logo = ImageReader(logo_path)
+            c.drawImage(
+                logo,
+                20 * mm,
+                height - 22 * mm,     # top-left area
+                width=28 * mm,
+                height=14 * mm,
+                preserveAspectRatio=True,
+                mask="auto",
+            )
+        except Exception:
+            pass
+
+    # Right-side header text
+    c.setFont("Helvetica", 10)
+    c.drawRightString(width - 20 * mm, height - 15 * mm, report_title)
+    c.setFont("Helvetica", 9)
+    c.drawRightString(width - 20 * mm, height - 22 * mm, f"Version: 1.0  Classification: {classification}")
+
+    # Footer
+    c.setFont("Helvetica", 9)
+    c.drawString(20 * mm, 12 * mm, f"Last Reviewed: {last_reviewed}")
+    c.drawString(20 * mm, 6 * mm, "Document Owner: RB Consultancy Ltd")
+    c.drawRightString(width - 20 * mm, 12 * mm, f"Page {doc.page}")
+
+
+def generate_pdf_bytes(
+    business_name: str,
+    email: str,
+    website: str,
+    hibp: Dict[str, Any],
+    ssl: Dict[str, Any],
+    classification: str = "Confidential",
+    last_reviewed: Optional[str] = None,
+    logo_path: Optional[str] = None,
+) -> bytes:
+    last_reviewed = last_reviewed or date.today().strftime("%d/%m/%Y")
+    report_title = f"Cyber Health Check Report {business_name}"
+    findings = build_findings(hibp, ssl)
+
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buf,
+        pagesize=A4,
+        leftMargin=20 * mm,
+        rightMargin=20 * mm,
+        topMargin=28 * mm,
+        bottomMargin=18 * mm,
+        title=report_title,
+    )
+
+    styles = getSampleStyleSheet()
+    styles.add(ParagraphStyle(name="H1", parent=styles["Heading1"], fontName="Helvetica-Bold", fontSize=26, spaceAfter=14))
+    styles.add(ParagraphStyle(name="H2", parent=styles["Heading2"], fontName="Helvetica-Bold", fontSize=14, spaceAfter=10))
+    styles.add(ParagraphStyle(name="Body", parent=styles["BodyText"], fontName="Helvetica", fontSize=10, leading=14))
+
+    story: List[Any] = []
+
+    # Cover (logo appears via header too, but we keep clean cover layout)
+    story.append(Spacer(1, 25 * mm))
+    story.append(Paragraph("Cyber Health Check Report", styles["H1"]))
+    story.append(Paragraph(business_name, styles["H1"]))
+    story.append(PageBreak())
+
+    # Contents
+    story.append(Paragraph("Document Contents Page", styles["H2"]))
+    contents_data = [
+        ["Summary", "3"],
+        ["High-Level Findings", "4"],
+        ["Detailed Findings", "5+"],
+        ["Considerations", "End"],
+    ]
+    t = Table(contents_data, colWidths=[120 * mm, 30 * mm])
+    t.setStyle(
+        TableStyle(
+            [
+                ("FONT", (0, 0), (-1, -1), "Helvetica", 10),
+                ("LINEBELOW", (0, 0), (-1, 0), 1, colors.black),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.whitesmoke, colors.white]),
+                ("ALIGN", (1, 0), (1, -1), "RIGHT"),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                ("TOPPADDING", (0, 0), (-1, -1), 6),
+            ]
+        )
+    )
+    story.append(t)
+    story.append(PageBreak())
+
+    # Summary
+    story.append(Paragraph("Summary", styles["H2"]))
+    story.append(
+        Paragraph(
+            "A cyber security health check has been carried out and this report shows the associated findings.<br/><br/>"
+            f"<b>Business name:</b> {business_name}<br/>"
+            f"<b>Email:</b> {email}<br/>"
+            f"<b>Website:</b> {website}<br/><br/>"
+            "Tests included in this generated report (based on the provided data files):<br/>"
+            "- Email compromise (HaveIBeenPwned extract)<br/>"
+            "- Website TLS posture (SSL Labs extract)<br/>",
+            styles["Body"],
+        )
+    )
+    story.append(PageBreak())
+
+    # High-Level Findings
+    story.append(Paragraph("High-Level Report Findings", styles["H2"]))
+
+    hl_rows = [["#", "Test", "Result", "Headline", "Summary"]]
+    for f in findings:
+        hl_rows.append([str(f.number), f.title, f.status, f.headline, f.summary])
+
+    hl = Table(hl_rows, colWidths=[10 * mm, 45 * mm, 18 * mm, 25 * mm, 70 * mm])
+    hl_style = [
+        ("FONT", (0, 0), (-1, 0), "Helvetica-Bold", 10),
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#E0E0E0")),
+        ("FONT", (0, 1), (-1, -1), "Helvetica", 9),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#FAFAFA")]),
+        ("TOPPADDING", (0, 0), (-1, -1), 6),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+    ]
+    for i, f in enumerate(findings, start=1):
+        hl_style.append(("TEXTCOLOR", (2, i), (2, i), _status_color(f.status)))
+        hl_style.append(("FONT", (2, i), (2, i), "Helvetica-Bold", 9))
+
+    hl.setStyle(TableStyle(hl_style))
+    story.append(hl)
+    story.append(PageBreak())
+
+    # Detailed pages
+    story.append(Paragraph("Aim and Importance", styles["H2"]))
+    story.append(
+        Paragraph(
+            "The aim of this health check is to raise awareness of cyber security related risks and help decide whether action should be taken. "
+            "The detailed sections below explain the detected outcomes from the provided data sources.",
+            styles["Body"],
+        )
+    )
+    story.append(PageBreak())
+
+    for f in findings:
+        story.append(Paragraph(f"{f.number}. {f.title}", styles["H2"]))
+        story.append(
+            Paragraph(
+                f"<b>Result:</b> <font color='{_status_color(f.status).hexval()}'>{f.status}</font> &nbsp;&nbsp;"
+                f"<b>{f.headline}</b>",
+                styles["Body"],
+            )
+        )
+        story.append(Spacer(1, 4 * mm))
+        story.append(Paragraph(f.summary, styles["Body"]))
+        story.append(Spacer(1, 6 * mm))
+
+        detail_table = Table(
+            [["Metric", "Value"]]
+            + [[k, v] for (k, v) in f.details],
+            colWidths=[55 * mm, 105 * mm],
+        )
+        detail_table.setStyle(
+            TableStyle(
+                [
+                    ("FONT", (0, 0), (-1, 0), "Helvetica-Bold", 10),
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#EEEEEE")),
+                    ("FONT", (0, 1), (-1, -1), "Helvetica", 9),
+                    ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                    ("TOPPADDING", (0, 0), (-1, -1), 6),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                ]
+            )
+        )
+        story.append(KeepTogether(detail_table))
+        story.append(PageBreak())
+
+    # Considerations
+    story.append(Paragraph("Considerations", styles["H2"]))
+    story.append(
+        Paragraph(
+            "This report is generated from the provided data extracts. To expand toward the full sample report scope, "
+            "add more test modules (SPF/DKIM/DMARC, headers, WAF checks, blacklist checks, etc.).",
+            styles["Body"],
+        )
+    )
+
+    def on_page(c: canvas.Canvas, d):
+        _draw_header_footer(
+            c=c,
+            doc=d,
+            report_title=report_title,
+            classification=classification,
+            last_reviewed=last_reviewed,
+            logo_path=logo_path,
+        )
+
+    doc.build(story, onFirstPage=on_page, onLaterPages=on_page)
+    return buf.getvalue()
