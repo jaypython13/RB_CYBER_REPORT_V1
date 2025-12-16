@@ -1,3 +1,4 @@
+# app.py
 import os
 import streamlit as st
 
@@ -6,8 +7,14 @@ from report_builder import load_json_from_text, generate_pdf_bytes
 st.set_page_config(page_title="RB Cyber Health Check", layout="wide")
 st.title("RB Cyber Health Check Report Generator")
 
-# Put your logo in your repo at: assets/RB_logo.jpg
-DEFAULT_LOGO_PATH = os.path.join("RB_logo.jpg")
+# Always use this bundled logo file
+RB_LOGO_PATH = os.path.join("assets", "RB_logo.jpg")
+if not os.path.exists(RB_LOGO_PATH):
+    st.error("RB logo not found. Please add it at: assets/RB_logo.jpg")
+    st.stop()
+
+# Optional: show logo in the app UI
+st.image(RB_LOGO_PATH, width=220)
 
 with st.sidebar:
     st.header("Report Inputs")
@@ -16,27 +23,6 @@ with st.sidebar:
     website = st.text_input("Website", value="TBD")
     classification = st.selectbox("Classification", ["Confidential", "Internal", "Public"], index=0)
     last_reviewed = st.text_input("Last Reviewed (DD/MM/YYYY)", value="")
-
-    st.divider()
-    st.subheader("Logo")
-    st.caption("Default: assets/RB_logo.jpg (used top-left on every page).")
-
-    use_default_logo = st.checkbox("Use bundled RB logo", value=True)
-    uploaded_logo = st.file_uploader("Or upload a logo (optional)", type=["png", "jpg", "jpeg"])
-
-logo_path = None
-if use_default_logo and os.path.exists(DEFAULT_LOGO_PATH):
-    logo_path = DEFAULT_LOGO_PATH
-
-if uploaded_logo is not None:
-    import tempfile
-
-    suffix = "." + uploaded_logo.name.split(".")[-1].lower()
-    fd, tmp_path = tempfile.mkstemp(suffix=suffix)
-    os.close(fd)
-    with open(tmp_path, "wb") as f:
-        f.write(uploaded_logo.getbuffer())
-    logo_path = tmp_path  # overrides default
 
 st.subheader("Upload Data Files")
 col1, col2 = st.columns(2)
@@ -56,11 +42,11 @@ if hibp_file and ssl_file:
 
         st.success("Files parsed successfully.")
 
-        with st.expander("Preview parsed HIBP JSON"):
-            st.json(hibp)
+        #with st.expander("Preview parsed HIBP JSON"):
+            #st.json(hibp)
 
-        with st.expander("Preview parsed SSL Labs JSON"):
-            st.json(ssl)
+        #with st.expander("Preview parsed SSL Labs JSON"):
+            #st.json(ssl)
 
         if st.button("Generate PDF Report"):
             pdf_bytes = generate_pdf_bytes(
@@ -71,7 +57,7 @@ if hibp_file and ssl_file:
                 ssl=ssl,
                 classification=classification,
                 last_reviewed=last_reviewed.strip() or None,
-                logo_path=logo_path,  # <-- RB logo top-left on every page
+                logo_path=RB_LOGO_PATH,  # <-- always RB_logo.jpg
             )
 
             st.download_button(
