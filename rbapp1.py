@@ -28,9 +28,9 @@ st.subheader("Upload Data Files")
 col1, col2 = st.columns(2)
 
 with col1:
-    hibp_file = st.file_uploader("HIBP data")", type=["txt", "json"])
+    hibp_file = st.file_uploader("HIBP data"), type=["txt", "json"])
 with col2:
-    ssl_file = st.file_uploader("SSL Labs Data")", type=["txt", "json"])
+    ssl_file = st.file_uploader("SSL Labs Data"), type=["txt", "json"])
 
 if hibp_file and ssl_file:
     try:
