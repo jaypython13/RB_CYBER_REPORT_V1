@@ -7,12 +7,13 @@ from report_builder import load_json_from_text, generate_pdf_bytes
 st.set_page_config(page_title="RB Cyber Health Check", layout="wide")
 st.title("RB Cyber Health Check Report Generator")
 # Optional: show logo in the app UI
-st.image(RB_LOGO_PATH, width=220)
 # Always use this bundled logo file
 RB_LOGO_PATH = os.path.join("RB_logo.jpg")
 if not os.path.exists(RB_LOGO_PATH):
     st.error("RB logo not found. Please add it at: assets/RB_logo.jpg")
     st.stop()
+st.image(RB_LOGO_PATH, width=220)
+
 
 
 
