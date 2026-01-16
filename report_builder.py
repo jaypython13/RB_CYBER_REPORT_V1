@@ -301,9 +301,9 @@ def generate_pdf_bytes(
     contents_data = [
         ["Summary", "3"],
         ["Information to Support NCSC Early Warning", "4"],
-        ["High-Level Findings", "5"],
-        ["Detailed Findings", "6+"],
-        ["Considerations", "End"],
+        ["High-Level Report Findings", "5"],
+        ["Aim and Importance", "9"],
+        ["Considerations", "14"],
     ]
     t = Table(contents_data, colWidths=[120 * mm, 30 * mm])
     t.setStyle(
