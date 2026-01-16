@@ -336,6 +336,58 @@ def generate_pdf_bytes(
     )
     story.append(PageBreak())
 
+        # -------------------------------------------------------
+    # Information to Support NCSC Early Warning (EXACT TEXT)
+    # -------------------------------------------------------
+    story.append(Paragraph("Information to Support NCSC Early Warning", styles["H2"]))
+    story.append(
+        Paragraph(
+            "The National Cyber Security Centre (NCSC) is the UK's technical authority on cyber security, "
+            "dedicated to making the UK the safest place to live and work online. The NCSC provides a range "
+            "of services to help organisations protect themselves and react to cyber threats. One of their "
+            "key offerings is called ‘Early Warning’ and is aimed to provide notification about potential "
+            "cyber security related threats such as malicious activity.<br/><br/>"
+
+            "The NCSC have a mission to make the UK the safest place to work online, and as such they have "
+            "made the Early Warning Service available to any sized organisation based in the UK. This "
+            "includes public sector bodies, private companies of all sizes, charities and not for profits, "
+            "educational institutes, healthcare providers and local authorities. There are thousands of "
+            "organisations already signed up, but many thousands more that can sign-up.<br/><br/>"
+
+            "<b>How it Works:</b><br/>"
+            "• Timely Alerts: Provides notifications about potential cyber threats as soon as they’re "
+            "detected by the NCSC. This (early warning) can give more opportunity to fix, before the "
+            "situation gets worse<br/>"
+            "• Reduced Risk: By receiving alerts about vulnerabilities and malicious activities, "
+            "organisations can strengthen security controls and reduce the risk of a data breach<br/>"
+            "• Free and Easy to Use: It’s a free service, that just requires sign-up. It’s also very easy "
+            "to setup and use<br/>"
+            "• Effective Communication: Having a point of contact aligned with the services, means the "
+            "(early warning) alerts will be sent to the correct person, who can take action.<br/>"
+            "• Adds to Existing Security Controls: The Early Warning service can enhance and supplement "
+            "the effectiveness of cyber security, by providing an additional layer of monitoring and "
+            "alerting<br/>"
+            "• Compliance Support: By helping organisations identify and address vulnerabilities, the "
+            "service supports compliance with UK data protection regulations and other legal requirements<br/><br/>"
+
+            "<b>To setup NCSC Early Warning for your organisation:</b><br/>"
+            "1. Create a MyNCSC Account: Organisations need to first create a MyNCSC account (unless "
+            "already holding one). This can be done by visiting the NCSC website and following the "
+            "registration instructions<br/>"
+            "2. Register for the Service: For the registration process, organisations provide their name "
+            "and/or company number. This is then reviewed and approved by the NCSC.<br/>"
+            "3. Reference Assets: Once registered, organisations can setup their assets (domain names and "
+            "IP addresses) within the MyNCSC Early Warning system. Asset can also be detected automatically, "
+            "based on the information provided. Members and points of contact can also be setup<br/>"
+            "4. Review and Act on Alerts: After setting up the service, organisations will start receiving "
+            "alerts about potential threats – this can be received via email and through the MyNCSC portal. "
+            "It’s important to review these alerts promptly and take appropriate actions to mitigate any "
+            "identified risks.",
+            styles["Body"],
+        )
+    )
+    story.append(PageBreak())
+
     # -------------------------------------------------------
     # High-Level Findings (FIXED: wrapped text + alignment)
     # -------------------------------------------------------
