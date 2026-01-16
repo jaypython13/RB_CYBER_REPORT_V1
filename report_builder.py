@@ -506,8 +506,13 @@ def generate_pdf_bytes(
     story.append(Paragraph("Considerations", styles["H2"]))
     story.append(
         Paragraph(
-            "This report is generated from the provided data extracts. To expand toward the full sample report scope, "
-            "add more test modules (SPF/DKIM/DMARC, headers, WAF checks, blacklist checks, etc.).",
+            " If any of the above test have failed – you may need to:"
+                "• Check whether it’s a false positive (incorrect report of a failure)"
+                "• Carry out further research and testing"
+                "• Check your legal and regulatory obligations"
+                "• Seek professional advice and support"
+                "• Carry out a risk assessment and manage the risk"
+                "• Manage and report a security incident",
             styles["Body"],
         )
     )
