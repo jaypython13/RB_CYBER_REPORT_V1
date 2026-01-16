@@ -24,38 +24,16 @@ from reportlab.platypus import (
 from reportlab.pdfgen import canvas
 
 
-# -----------------------------
-# JSON parsing helpers
-# -----------------------------
-def _strip_to_json(text: str) -> str:
-    i = text.find("{")
-    if i == -1:
-        raise ValueError("No JSON object found.")
-    return text[i:]
-
-
-def _normalize_extended_json(obj: Any) -> Any:
-    if isinstance(obj, dict):
-        if "$date" in obj and len(obj) == 1:
-            return obj["$date"]
-        if "$numberLong" in obj and len(obj) == 1:
-            try:
-                return int(obj["$numberLong"])
-            except Exception:
-                return obj["$numberLong"]
-        return {k: _normalize_extended_json(v) for k, v in obj.items()}
-    if isinstance(obj, list):
-        return [_normalize_extended_json(x) for x in obj]
-    return obj
-
-
+# ------------------------------------------------
+# JSON helpers
+# ------------------------------------------------
 def load_json_from_text(text: str) -> Dict[str, Any]:
-    return _normalize_extended_json(json.loads(_strip_to_json(text)))
+    return json.loads(text[text.find("{"):])
 
 
-# -----------------------------
+# ------------------------------------------------
 # Data model
-# -----------------------------
+# ------------------------------------------------
 @dataclass
 class Finding:
     number: int
@@ -73,15 +51,13 @@ def _status_color(status: str) -> colors.Color:
     }.get(status, colors.HexColor("#616161"))
 
 
-# -----------------------------
-# Findings builder
-# -----------------------------
+# ------------------------------------------------
+# Findings logic
+# ------------------------------------------------
 def build_findings(hibp: Dict[str, Any], ssl: Dict[str, Any]) -> List[Finding]:
-    findings: List[Finding] = []
+    findings = []
 
-    # 1. Account compromise
-    hibp_summary = hibp.get("summary", {})
-    is_pwned = bool(hibp_summary.get("is_pwned", False))
+    is_pwned = hibp.get("summary", {}).get("is_pwned", False)
 
     findings.append(
         Finding(
@@ -93,14 +69,12 @@ def build_findings(hibp: Dict[str, Any], ssl: Dict[str, Any]) -> List[Finding]:
             f"{'has' if is_pwned else 'has not'} been recorded as part of known data breaches.",
             [
                 ("Email", hibp.get("email", "N/A")),
-                ("Breaches found", str(hibp_summary.get("breaches_found", 0))),
-                ("Pastes found", str(hibp_summary.get("pastes_found", 0))),
-                ("Scan date", str(hibp.get("scanned_at", "N/A"))),
+                ("Breaches found", str(hibp.get("summary", {}).get("breaches_found", 0))),
+                ("Scan date", hibp.get("scanned_at", "N/A")),
             ],
         )
     )
 
-    # 2. Website encryption (SSL Labs)
     grade = ssl.get("grade", "N/A")
     good = grade in ("A", "A+")
 
@@ -124,9 +98,9 @@ def build_findings(hibp: Dict[str, Any], ssl: Dict[str, Any]) -> List[Finding]:
     return findings
 
 
-# -----------------------------
+# ------------------------------------------------
 # Header / Footer
-# -----------------------------
+# ------------------------------------------------
 def _draw_header_footer(c, doc, title, classification, reviewed, logo):
     width, height = A4
 
@@ -154,9 +128,9 @@ def _draw_header_footer(c, doc, title, classification, reviewed, logo):
     c.drawRightString(width - 20 * mm, 12 * mm, f"Page {doc.page}")
 
 
-# -----------------------------
+# ------------------------------------------------
 # PDF generator
-# -----------------------------
+# ------------------------------------------------
 def generate_pdf_bytes(
     business_name: str,
     email: str,
@@ -201,8 +175,7 @@ def generate_pdf_bytes(
     story += [
         Paragraph("Summary", styles["H2"]),
         Paragraph(
-            f"RB Consultancy Ltd have been requested to carry out a cyber security health check for "
-            f"{business_name}. The report is based on the following information provided:<br/><br/>"
+            f"A cyber security health check has been carried out using information provided by the client.<br/><br/>"
             f"<b>Business name:</b> {business_name}<br/>"
             f"<b>Email:</b> {email}<br/>"
             f"<b>Website:</b> {website}<br/>",
@@ -211,39 +184,36 @@ def generate_pdf_bytes(
         PageBreak(),
     ]
 
-    # -------------------------------------------------
-    # NCSC EARLY WARNING SECTION (NEW)
-    # -------------------------------------------------
+    # ------------------------------------------------
+    # NCSC EARLY WARNING (EXACT TEXT)
+    # ------------------------------------------------
     story.append(Paragraph("Information to Support NCSC Early Warning", styles["H2"]))
-    story.append(
-        Paragraph(
-            "The National Cyber Security Centre (NCSC) is the UK’s technical authority on cyber security "
-            "and provides services to help organisations protect themselves from cyber threats. One of "
-            "their key services is the Early Warning service, which provides notification of potential "
-            "cyber security related threats such as malicious activity.<br/><br/>"
-            "The Early Warning service is free to use and is available to organisations of any size "
-            "based in the UK, including private companies, charities, public sector bodies and educational "
-            "institutions.<br/><br/>"
-            "<b>Key benefits include:</b><br/>"
-            "• Timely alerts about detected cyber threats<br/>"
-            "• Reduced risk through early identification of vulnerabilities<br/>"
-            "• Easy setup and effective communication to the right contacts<br/>"
-            "• Additional monitoring to support existing security controls<br/>"
-            "• Support for compliance with UK data protection regulations<br/><br/>"
-            "<b>To set up the service:</b><br/>"
-            "1. Create a MyNCSC account<br/>"
-            "2. Register your organisation for the Early Warning service<br/>"
-            "3. Add and manage your assets (domains and IP addresses)<br/>"
-            "4. Review alerts and take action where required",
-            styles["Body"],
-        )
-    )
+    story.append(Paragraph(
+        """The National Cyber Security Centre (NCSC) is the UK's technical authority on cyber security, dedicated to making the UK the safest place to live and work online. The NCSC provides a range of services to help organisations protect themselves and react to cyber threats. One of their key offerings is called ‘Early Warning’ and is aimed to provide notification about potential cyber security related threats such as malicious activity.<br/><br/>
+        The NCSC have a mission to make the UK the safest place to work online, and as such they have made the Early Warning Service available to any sized organisation based in the UK. This includes public sector bodies, private companies of all sizes, charities and not for profits, educational institutes, healthcare providers and local authorities. There are thousands of organisations already signed up, but many thousands more that can sign-up.<br/><br/>
+        <b>How it Works:</b><br/>
+        • Timely Alerts: Provides notifications about potential cyber threats as soon as they’re detected by the NCSC. This (early warning) can give more opportunity to fix, before the situation gets worse<br/>
+        • Reduced Risk: By receiving alerts about vulnerabilities and malicious activities, organisations can strengthen security controls and reduce the risk of a data breach<br/>
+        • Free and Easy to Use: It’s a free service, that just requires sign-up. It’s also very easy to setup and use<br/>
+        • Effective Communication: Having a point of contact aligned with the services, means the (early warning) alerts will be sent to the correct person, who can take action<br/>
+        • Adds to Existing Security Controls: The Early Warning service can enhance and supplement the effectiveness of cyber security, by providing an additional layer of monitoring and alerting<br/>
+        • Compliance Support: By helping organisations identify and address vulnerabilities, the service supports compliance with UK data protection regulations and other legal requirements<br/><br/>
+        <b>To setup NCSC Early Warning for your organisation:</b><br/>
+        1. Create a MyNCSC Account<br/>
+        2. Register for the Service<br/>
+        3. Reference Assets<br/>
+        4. Review and Act on Alerts
+        """,
+        styles["Body"]
+    ))
     story.append(PageBreak())
 
+    # ------------------------------------------------
     # High-Level Findings
+    # ------------------------------------------------
     story.append(Paragraph("High-Level Report Findings", styles["H2"]))
 
-    hl_rows = [[
+    table_data = [[
         Paragraph("<b>#</b>", styles["Body"]),
         Paragraph("<b>Test</b>", styles["Body"]),
         Paragraph("<b>Result</b>", styles["Body"]),
@@ -252,29 +222,53 @@ def generate_pdf_bytes(
     ]]
 
     for f in findings:
-        hl_rows.append([
+        table_data.append([
             Paragraph(str(f.number), styles["Body"]),
             Paragraph(f.title, styles["Body"]),
-            Paragraph(
-                f"<font color='{_status_color(f.status).hexval()}'><b>{f.status}</b></font>",
-                styles["Body"],
-            ),
+            Paragraph(f"<font color='{_status_color(f.status).hexval()}'><b>{f.status}</b></font>", styles["Body"]),
             Paragraph(f.headline, styles["Body"]),
             Paragraph(f.summary, styles["Body"]),
         ])
 
-    hl = Table(hl_rows, colWidths=[10 * mm, 45 * mm, 18 * mm, 30 * mm, 57 * mm], repeatRows=1)
-    hl.setStyle(TableStyle([
+    t = Table(table_data, colWidths=[10*mm, 45*mm, 18*mm, 30*mm, 57*mm], repeatRows=1)
+    t.setStyle(TableStyle([
         ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
         ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#E0E0E0")),
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
-        ("ALIGN", (0, 0), (0, -1), "CENTER"),
-        ("ALIGN", (2, 1), (2, -1), "CENTER"),
-        ("LEFTPADDING", (0, 0), (-1, -1), 6),
-        ("RIGHTPADDING", (0, 0), (-1, -1), 6),
     ]))
+    story.append(t)
+    story.append(PageBreak())
 
-    story.append(hl)
+    # Aim and Importance
+    story.append(Paragraph("Aim and Importance", styles["H2"]))
+    story.append(Paragraph(
+        "The aim of this health check is to raise awareness of cyber security risks and help determine "
+        "whether further action is required to improve the organisation’s cyber security posture.",
+        styles["Body"]
+    ))
+    story.append(PageBreak())
+
+    # Detailed Findings
+    for f in findings:
+        story.append(Paragraph(f"{f.number}. {f.title}", styles["H2"]))
+        story.append(Paragraph(f.summary, styles["Body"]))
+        story.append(Spacer(1, 6*mm))
+
+        dt = Table([["Metric", "Value"]] + f.details, colWidths=[60*mm, 100*mm])
+        dt.setStyle(TableStyle([
+            ("GRID", (0,0), (-1,-1), 0.5, colors.grey),
+            ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#EEEEEE")),
+        ]))
+        story.append(dt)
+        story.append(PageBreak())
+
+    # Considerations
+    story.append(Paragraph("Considerations", styles["H2"]))
+    story.append(Paragraph(
+        "This report is generated using client-provided data extracts and should be considered a point-in-time assessment. "
+        "RB Consultancy Ltd recommend regular reviews and additional security assessments for ongoing risk management.",
+        styles["Body"]
+    ))
 
     def on_page(c, d):
         _draw_header_footer(c, d, title, classification, last_reviewed, logo_path)
