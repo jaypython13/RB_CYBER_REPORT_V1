@@ -2,7 +2,7 @@
 import os
 import streamlit as st
 
-from report_builder import load_json_from_text, generate_pdf_bytes
+from report_builder_tool import load_json_from_text, generate_pdf_bytes
 
 st.set_page_config(page_title="RB Cyber Health Check", layout="wide")
 
