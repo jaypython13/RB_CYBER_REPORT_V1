@@ -503,15 +503,15 @@ def generate_pdf_bytes(
             "help consider whether action should be taken.<br/><br/>"
 
             "For each test the following criteria has been expanded on to support understanding, importance "
-            "and decision making:<br/><br/><br/>"
-            "• Impact – what a potential failed test might lead to<br/><br/>"
-            "• Example – more specific cyberattack technique that could be faced and/or example of financial impact<br/><br/>"
+            "and decision making:<br/><br/>"
+            "• Impact – what a potential failed test might lead to<br/><br/><br/>"
+            "• Example – more specific cyberattack technique that could be faced and/or example of financial impact<br/><br/><br/>"
             "• Data privacy and protection – reference to United Kingdom and European Union General Data Protection Regulations "
-            "(UK and EU GDPR) and California Consumer Privacy Act (CCPA)<br/><br/>"
-            "• Potential Resolution – action that may be considered to reduce the risk<br/><br/>"
+            "(UK and EU GDPR) and California Consumer Privacy Act (CCPA)<br/><br/><br/>"
+            "• Potential Resolution – action that may be considered to reduce the risk<br/><br/><br/>"
             "• Resolution risk – impact that may need to be considered as a result of implementing action to reduce the risk<br/>"
-            "• To pass our test – criteria that we have set to pass the test<br/><br/>"
-            "• Key metric / perspective – insight on how wide-spread the risk may be.<br/><br/>"
+            "• To pass our test – criteria that we have set to pass the test<br/><br/><br/>"
+            "• Key metric / perspective – insight on how wide-spread the risk may be.<br/><br/><br/>"
 
             "<b>1. Account compromise</b><br/><br/>"
             "• Impact - your account password may be known and/or your email / data may be accessible to others<br/>"
@@ -677,7 +677,7 @@ def generate_pdf_bytes(
     story.append(Paragraph("Considerations", styles["H2"]))
     story.append(
         Paragraph(
-            " If any of the above test have failed – you may need to:<br/><br/>"
+            " <b>If any of the above test have failed – you may need to:</b><br/><br/>"
                 "• Check whether it’s a false positive (incorrect report of a failure)<br/>"
                 "• Carry out further research and testing<br/>"
                 "• Check your legal and regulatory obligations<br/>"
