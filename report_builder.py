@@ -504,14 +504,14 @@ def generate_pdf_bytes(
 
             "For each test the following criteria has been expanded on to support understanding, importance "
             "and decision making:<br/><br/>"
-            "• Impact – what a potential failed test might lead to<br/><br/><br/>"
-            "• Example – more specific cyberattack technique that could be faced and/or example of financial impact<br/><br/><br/>"
+            "• Impact – what a potential failed test might lead to<br/><br/>"
+            "• Example – more specific cyberattack technique that could be faced and/or example of financial impact<br/><br/>"
             "• Data privacy and protection – reference to United Kingdom and European Union General Data Protection Regulations "
-            "(UK and EU GDPR) and California Consumer Privacy Act (CCPA)<br/><br/><br/>"
-            "• Potential Resolution – action that may be considered to reduce the risk<br/><br/><br/>"
+            "(UK and EU GDPR) and California Consumer Privacy Act (CCPA)<br/><br/>"
+            "• Potential Resolution – action that may be considered to reduce the risk<br/><br/>"
             "• Resolution risk – impact that may need to be considered as a result of implementing action to reduce the risk<br/>"
-            "• To pass our test – criteria that we have set to pass the test<br/><br/><br/>"
-            "• Key metric / perspective – insight on how wide-spread the risk may be.<br/><br/><br/>"
+            "• To pass our test – criteria that we have set to pass the test<br/><br/>"
+            "• Key metric / perspective – insight on how wide-spread the risk may be.<br/><br/>"
 
             "<b>1. Account compromise</b><br/><br/>"
             "• Impact - your account password may be known and/or your email / data may be accessible to others<br/>"
@@ -589,7 +589,7 @@ def generate_pdf_bytes(
             "• To pass our test – your website must not appear on a blacklist site lists<br/><br/>"
             "• Key metric / perspective – Approximately 99% of websites should pass this test based on our (external) 2024 data source.<br/><br/>"
 
-            "<b>8. Website encryption</b><br/>"
+            "<b>8. Website encryption</b><br/><br/>"
             "• Potential Impact – communication to / from your website may be read by others<br/>"
             "• Example – ‘man-in-the-middle’ attacks can take place on websites without strong encryption<br/>"
             "• Data privacy and protection – potential for unauthorised access to personal data and therefore non-compliance "
@@ -599,7 +599,7 @@ def generate_pdf_bytes(
             "• To pass our test – your website must be identified to use TLS 1.2 or above and must not support weak encryption<br/>"
             "• Key metric / perspective – Approximately 97% of websites should pass this test based on our (external) 2024 data source.<br/><br/>"
 
-            "<b>9. Website privacy notice</b><br/>"
+            "<b>9. Website privacy notice</b><br/><br/>"
             "• Potential Impact – you may not be informing website visitors that their personal data is being collected<br/>"
             "• Example – Google (2019) and Facebook (2018) have both experienced heavy fines<br/>"
             "• Data privacy and protection – potential for unauthorised access to personal data and therefore non-compliance "
@@ -609,7 +609,7 @@ def generate_pdf_bytes(
             "• To pass our test – your website must have a clear option to enable viewing of a privacy notice<br/>"
             "• Key metric / perspective – Approximately 36% of websites should pass this test based on our (external) 2024 data source.<br/><br/>"
 
-            "<b>10. Website cookies notice</b><br/>"
+            "<b>10. Website cookies notice</b><br/><br/>"
             "• Potential Impact – you may be collecting data from website visitors without their consent<br/>"
             "• Example – Sephora (2022) were fined around $1.2m in relation to cookies<br/>"
             "• Data privacy and protection – potential for unauthorised access to personal data and therefore non-compliance "
@@ -619,7 +619,7 @@ def generate_pdf_bytes(
             "• To pass our test – your website must have a clear option to enable viewing of a dedicated cookies notice<br/>"
             "• Key metric / perspective – Approximately 36% of websites should pass this test based on our (external) 2024 data source.<br/><br/>"
 
-            "<b>11. Website cookies rejection (before usage)</b><br/>"
+            "<b>11. Website cookies rejection (before usage)</b><br/><br/>"
             "• Potential Impact – you may be collecting data from website visitors without their consent<br/>"
             "• Example – Google (2021) were fined around $150m for not providing a straight forward way to reject cookies<br/>"
             "• Data privacy and protection – potential for unauthorised access to personal data and therefore non-compliance "
@@ -629,7 +629,7 @@ def generate_pdf_bytes(
             "• To pass our test – when first visiting your website, there must be a clear banner or button to reject non-essential cookies<br/>"
             "• Key metric / perspective – Approximately 50% of websites should pass this test based on our (external) 2024 data source.<br/><br/>"
 
-            "<b>12. Website cookies rejection (after initial consent)</b><br/>"
+            "<b>12. Website cookies rejection (after initial consent)</b><br/><br/>"
             "• Potential Impact – you may be collecting data from website visitors without their consent<br/>"
             "• Example – TikTok (2023) were fined around $5m for making it difficult for users to refuse cookies<br/>"
             "• Data privacy and protection – potential for unauthorised access to personal data and therefore non-compliance "
@@ -639,7 +639,7 @@ def generate_pdf_bytes(
             "• To pass our test – when returning to your website, there must be a clear banner or button to reject non-essential cookies<br/>"
             "• Key metric / perspective – Approximately 60% of websites should pass this test based on our (external) 2024 data source.<br/><br/>"
 
-            "<b>13. Website web application firewall</b><br/>"
+            "<b>13. Website web application firewall</b><br/><br/>"
             "• Potential Impact – your website may be susceptible to attack and/or compromise<br/>"
             "• Example – SQL injection and remote code execution attacks<br/>"
             "• Data privacy and protection – potential for unauthorised access to personal data and therefore non-compliance "
@@ -649,7 +649,7 @@ def generate_pdf_bytes(
             "• To pass our test – your website must indicate a web application firewall is in place during testing<br/>"
             "• Key metric / perspective – Approximately 70% of websites should pass this test based on our (external) 2024 data source.<br/><br/>"
 
-            "<b>14. Website security headers</b><br/>"
+            "<b>14. Website security headers</b><br/><br/>"
             "• Potential Impact – your website may be susceptible to attack and/or compromise<br/>"
             "• Example – credit card skimming attacks<br/>"
             "• Data privacy and protection – potential for unauthorised access to personal data and therefore non-compliance "
@@ -659,7 +659,7 @@ def generate_pdf_bytes(
             "• To pass our test – your website must be rated as having ‘grade C’ level hardening or above<br/>"
             "• Key metric / perspective – Approximately 14% of websites should pass this test based on our (external) 2024 data source.<br/><br/>"
 
-            "<b>15. Information Commissioners Office (ICO) register of data protection fee payers</b><br/>"
+            "<b>15. Information Commissioners Office (ICO) register of data protection fee payers</b><br/><br/>"
             "• Potential Impact – your organisation may not be exempt from fees and could be subject to financial charges<br/>"
             "• Example – nonpayment can result in fines of up to £4,000<br/>"
             "• Data privacy and protection – potential for unauthorised access to personal data and therefore non-compliance "
