@@ -300,8 +300,9 @@ def generate_pdf_bytes(
     story.append(Paragraph("Document Contents Page", styles["H2"]))
     contents_data = [
         ["Summary", "3"],
-        ["High-Level Findings", "4"],
-        ["Detailed Findings", "5+"],
+        ["Information to Support NCSC Early Warning", "4"],
+        ["High-Level Findings", "5"],
+        ["Detailed Findings", "6+"],
         ["Considerations", "End"],
     ]
     t = Table(contents_data, colWidths=[120 * mm, 30 * mm])
@@ -336,8 +337,8 @@ def generate_pdf_bytes(
     )
     story.append(PageBreak())
 
-        # -------------------------------------------------------
-    # Information to Support NCSC Early Warning (EXACT TEXT)
+    # -------------------------------------------------------
+    # Information to Support NCSC Early Warning 
     # -------------------------------------------------------
     story.append(Paragraph("Information to Support NCSC Early Warning", styles["H2"]))
     story.append(
@@ -455,7 +456,44 @@ def generate_pdf_bytes(
     story.append(hl)
     story.append(PageBreak())
 
-        # -------------------------------------------------------
+
+
+    # Detailed Findings
+    for f in findings:
+        story.append(Paragraph(f"{f.number}. {f.title}", styles["H2"]))
+        story.append(
+            Paragraph(
+                f"<b>Result:</b> <font color='{_status_color(f.status).hexval()}'>{f.status}</font> &nbsp;&nbsp;"
+                f"<b>{f.headline}</b>",
+                styles["Body"],
+            )
+        )
+        story.append(Spacer(1, 4 * mm))
+        story.append(Paragraph(f.summary, styles["Body"]))
+        story.append(Spacer(1, 6 * mm))
+
+        detail_table = Table(
+            [["Metric", "Value"]] + [[k, v] for (k, v) in f.details],
+            colWidths=[55 * mm, 105 * mm],
+        )
+        detail_table.setStyle(
+            TableStyle(
+                [
+                    ("FONT", (0, 0), (-1, 0), "Helvetica-Bold", 10),
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#EEEEEE")),
+                    ("FONT", (0, 1), (-1, -1), "Helvetica", 9),
+                    ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                    ("TOPPADDING", (0, 0), (-1, -1), 6),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 6),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+                ]
+            )
+        )
+        story.append(KeepTogether(detail_table))
+        story.append(PageBreak())
+    # -------------------------------------------------------
     # Aim and Importance
     # -------------------------------------------------------
     story.append(Paragraph("Aim and Importance", styles["H2"]))
@@ -634,44 +672,7 @@ def generate_pdf_bytes(
         )
     )
     story.append(PageBreak())
-
-
-    # Detailed Findings
-    for f in findings:
-        story.append(Paragraph(f"{f.number}. {f.title}", styles["H2"]))
-        story.append(
-            Paragraph(
-                f"<b>Result:</b> <font color='{_status_color(f.status).hexval()}'>{f.status}</font> &nbsp;&nbsp;"
-                f"<b>{f.headline}</b>",
-                styles["Body"],
-            )
-        )
-        story.append(Spacer(1, 4 * mm))
-        story.append(Paragraph(f.summary, styles["Body"]))
-        story.append(Spacer(1, 6 * mm))
-
-        detail_table = Table(
-            [["Metric", "Value"]] + [[k, v] for (k, v) in f.details],
-            colWidths=[55 * mm, 105 * mm],
-        )
-        detail_table.setStyle(
-            TableStyle(
-                [
-                    ("FONT", (0, 0), (-1, 0), "Helvetica-Bold", 10),
-                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#EEEEEE")),
-                    ("FONT", (0, 1), (-1, -1), "Helvetica", 9),
-                    ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                    ("TOPPADDING", (0, 0), (-1, -1), 6),
-                    ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
-                    ("LEFTPADDING", (0, 0), (-1, -1), 6),
-                    ("RIGHTPADDING", (0, 0), (-1, -1), 6),
-                ]
-            )
-        )
-        story.append(KeepTogether(detail_table))
-        story.append(PageBreak())
-
+    
     # Considerations
     story.append(Paragraph("Considerations", styles["H2"]))
     story.append(
