@@ -677,13 +677,13 @@ def generate_pdf_bytes(
     story.append(Paragraph("Considerations", styles["H2"]))
     story.append(
         Paragraph(
-            " If any of the above test have failed – you may need to:"
-                "• Check whether it’s a false positive (incorrect report of a failure)"
-                "• Carry out further research and testing"
-                "• Check your legal and regulatory obligations"
-                "• Seek professional advice and support"
-                "• Carry out a risk assessment and manage the risk"
-                "• Manage and report a security incident",
+            " If any of the above test have failed – you may need to:<br/><br/>"
+                "• Check whether it’s a false positive (incorrect report of a failure)<br/>"
+                "• Carry out further research and testing<br/>"
+                "• Check your legal and regulatory obligations<br/>"
+                "• Seek professional advice and support<br/>"
+                "• Carry out a risk assessment and manage the risk<br/>"
+                "• Manage and report a security incident<br/>",
             styles["Body"],
         )
     )
