@@ -54,7 +54,7 @@ if hibp_file and ssl_file:
              with st.spinner("🔐 AI is analysing HIBP and SSL Labs data and generating the Cyber Health Check report..."):
                 time.sleep(5)  # simulate AI processing time
     
-                 pdf_bytes = generate_pdf_bytes(
+                pdf_bytes = generate_pdf_bytes(
                     business_name=business_name.strip() or "TBD",
                     email=email.strip() or "TBD",
                     website=website.strip() or "TBD",
