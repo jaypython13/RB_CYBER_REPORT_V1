@@ -303,7 +303,7 @@ def generate_pdf_bytes(
         ["Information to Support NCSC Early Warning", "4"],
         ["High-Level Report Findings", "5"],
         ["Aim and Importance", "9"],
-        ["Considerations", "14"],
+        ["Considerations", "16"],
     ]
     t = Table(contents_data, colWidths=[120 * mm, 30 * mm])
     t.setStyle(
@@ -510,7 +510,7 @@ def generate_pdf_bytes(
             "• Data privacy and protection – reference to United Kingdom and European Union General Data Protection Regulations "
             "(UK and EU GDPR) and California Consumer Privacy Act (CCPA).<br/><br/>"
             "• Potential Resolution – action that may be considered to reduce the risk.<br/><br/>"
-            "• Resolution risk – impact that may need to be considered as a result of implementing action to reduce the risk.<br/>"
+            "• Resolution risk – impact that may need to be considered as a result of implementing action to reduce the risk.<br/><br/>"
             "• To pass our test – criteria that we have set to pass the test.<br/><br/>"
             "• Key metric / perspective – insight on how wide-spread the risk may be.<br/><br/>"
 
