@@ -53,18 +53,15 @@ if hibp_file and ssl_file:
         if st.button("Generate PDF Report"):
              #with st.spinner("🤖 AI is analysing your data and generating the Cyber Health Check report..."):
                 #time.sleep(3)  # simulate AI processing time
-            status = st.empty()
+            #status = st.empty()
 
-            status.info("🔐 Analysing Have I Been Pwned data...")
+            st.info("🔐 Analysing Have I Been Pwned data...")
             time.sleep(2)
-
-            status.info("🔐 Analysing SSL Labs data...")
+            st.info("🔐 Analysing SSL Labs data...")
             time.sleep(2)
-
-            status.info("📄 Generating Cyber Health Check report...")
-            break
-
-            st.success("📄 Now, your Cyber Health Check Report is ready to download")
+            st.info("📄 Generating Cyber Health Check report...")
+            
+            st.success("📄 Your Cyber Health Check Report is ready to download")
             #time.sleep(1)
             
             pdf_bytes = generate_pdf_bytes(
