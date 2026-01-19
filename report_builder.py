@@ -580,7 +580,7 @@ def generate_pdf_bytes(
             "• Data privacy and protection – potential for unauthorised access to personal data and therefore non-compliance "
             "with UK GDPR, EU GDPR and CCPA.<br/><br/>"
             "• Potential resolution – isolate, clean, recover and secure your web server.<br/><br/>"
-            "• Resolution risk – service disruption, misconfiguration and compatibility issues on website due to change<br/>"
+            "• Resolution risk – service disruption, misconfiguration and compatibility issues on website due to change<br/><br/>"
             "• To pass our test – your website must not have malware detected by scanners.<br/><br/>"
             "• Key metric / perspective – Approximately 93% of websites should pass this test based on our (external) 2024 data source.<br/><br/>"
 
