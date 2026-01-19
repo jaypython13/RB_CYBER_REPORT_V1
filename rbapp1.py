@@ -63,11 +63,11 @@ if hibp_file and ssl_file:
                     classification=classification,
                     last_reviewed=last_reviewed.strip() or None,
                     logo_path=RB_LOGO_PATH,  # <-- always RB_logo.jpg
-                )
+                 )
             
-                 st.success("📄 Your Cyber Health Check Report is ready to download")
+                st.success("📄 Your Cyber Health Check Report is ready to download")
                  
-                 st.download_button(
+                st.download_button(
                     "Download Report (PDF)",
                     data=pdf_bytes,
                     file_name=f"Cyber_Health_Check_Report_{(business_name or 'TBD').replace(' ', '_')}.pdf",
