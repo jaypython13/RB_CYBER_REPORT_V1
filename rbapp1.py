@@ -51,9 +51,9 @@ if hibp_file and ssl_file:
 
         if st.button("Generate PDF Report"):
             pdf_bytes = generate_pdf_bytes(
-                business_name=business_name.strip() or "TBD",
-                email=email.strip() or "TBD",
-                website=website.strip() or "TBD",
+                business_name=business_name.strip() or "Enter your business name here",
+                email=email.strip() or "Enter your business email here ",
+                website=website.strip() or "Enter your website here",
                 hibp=hibp,
                 ssl=ssl,
                 classification=classification,
