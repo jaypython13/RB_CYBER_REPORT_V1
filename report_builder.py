@@ -123,8 +123,7 @@ def build_findings(hibp: Dict[str, Any], ssl: Dict[str, Any]) -> List[Finding]:
                 ("Pastes found", str(pastes_found)),
                 #("Breaches", ", ".join(breaches) if breaches else "None"),
                 (
-                "Breaches",
-                "<br/>".join(str(b) for b in breaches) if breaches else "None",
+                "Breaches",.join(str(b) for b in breaches) if breaches else "None",
                 ),
                 #("Breaches", ","<br/>.join(breaches) if breaches else "None"),
                 ("Scan date", str(hibp.get("scanned_at", "N/A"))),
