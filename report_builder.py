@@ -566,10 +566,10 @@ def generate_pdf_bytes(
 
             "<b>5. Public IP address vulnerability</b><br/><br/>"
             "• Potential Impact – systems weaknesses could be exploited, leading to data compromise.<br/><br/>"
-            "• Example – ‘exploitation’ attack is a technique used by bad actors, to scan and detect known vulnerabilities, then exploit weakness<br/>"
+            "• Example – ‘exploitation’ attack is a technique used by bad actors, to scan and detect known vulnerabilities, then exploit weakness<br/><br/>"
             "• Data privacy and protection – potential for unauthorised access to personal data and therefore non-compliance "
             "with UK GDPR, EU GDPR and CCPA.<br/><br/>"
-            "• Potential resolution – review, remove and/or block access to known weaknesses that are associated with your public IP address<br/><br/>"
+            "• Potential resolution – review, remove and/or block access to known weaknesses that are associated with your public IP address.<br/><br/>"
             "• Resolution risk – service disruption, misconfiguration and compatibility issues on hosts that have been changed.<br/><br/>"
             "• To pass our test – no vulnerabilities must be detected on your public IP address.<br/><br/>"
             "• Key metric / perspective – Approximately 80% of public IP addresses should pass this test based on our (external) 2023 data source.<br/><br/>"
