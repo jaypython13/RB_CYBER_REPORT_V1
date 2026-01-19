@@ -51,9 +51,19 @@ if hibp_file and ssl_file:
             #st.json(ssl)
 
         if st.button("Generate PDF Report"):
-             with st.spinner("🤖 AI is analysing your data and generating the Cyber Health Check report..."):
-                time.sleep(3)  # simulate AI processing time
-                pdf_bytes = generate_pdf_bytes(
+             #with st.spinner("🤖 AI is analysing your data and generating the Cyber Health Check report..."):
+                #time.sleep(3)  # simulate AI processing time
+             status = st.empty()
+
+            status.info("🤖 Analysing Have I Been Pwned data...")
+            time.sleep(1.5)
+
+            status.info("🔐 Analysing SSL Labs security posture...")
+            time.sleep(1.5)
+
+            status.info("📄 Generating Cyber Health Check report...")
+            time.sleep(2)
+            pdf_bytes = generate_pdf_bytes(
                     business_name=business_name.strip() or "TBD",
                     email=email.strip() or "TBD",
                     website=website.strip() or "TBD",
@@ -62,14 +72,14 @@ if hibp_file and ssl_file:
                     classification=classification,
                     last_reviewed=last_reviewed.strip() or None,
                     logo_path=RB_LOGO_PATH,  # <-- always RB_logo.jpg
-                )
+            )
 
-                st.download_button(
+            st.download_button(
                     "Download Report (PDF)",
                     data=pdf_bytes,
                     file_name=f"Cyber_Health_Check_Report_{(business_name or 'TBD').replace(' ', '_')}.pdf",
                     mime="application/pdf",
-                )
+            )
 
     except Exception as e:
         st.error(f"Failed to parse/generate report: {e}")
