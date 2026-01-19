@@ -51,19 +51,13 @@ if hibp_file and ssl_file:
             #st.json(ssl)
 
         if st.button("Generate PDF Report"):
-             #with st.spinner("🤖 AI is analysing your data and generating the Cyber Health Check report..."):
-                #time.sleep(3)  # simulate AI processing time
-            #status = st.empty()
+             with st.spinner("🔐 AI is analysing your data and generating the Cyber Health Check report..."):
+                time.sleep(3)  # simulate AI processing time
+         
+   
+            
 
-            st.info("🔐 Analysing Have I Been Pwned data...")
-            time.sleep(2)
-            st.info("🔐 Analysing SSL Labs data...")
-            time.sleep(2)
-            st.info("📄 Generating Cyber Health Check report...")
-            
-            st.success("📄 Your Cyber Health Check Report is ready to download")
-            #time.sleep(1)
-            
+    
             pdf_bytes = generate_pdf_bytes(
                     business_name=business_name.strip() or "TBD",
                     email=email.strip() or "TBD",
@@ -74,7 +68,8 @@ if hibp_file and ssl_file:
                     last_reviewed=last_reviewed.strip() or None,
                     logo_path=RB_LOGO_PATH,  # <-- always RB_logo.jpg
             )
-
+            
+            st.success("📄 Your Cyber Health Check Report is ready to download")
             st.download_button(
                     "Download Report (PDF)",
                     data=pdf_bytes,
