@@ -64,12 +64,12 @@ if hibp_file and ssl_file:
                     logo_path=RB_LOGO_PATH,  # <-- always RB_logo.jpg
                 )
 
-            st.download_button(
-                "Download Report (PDF)",
-                data=pdf_bytes,
-                file_name=f"Cyber_Health_Check_Report_{(business_name or 'TBD').replace(' ', '_')}.pdf",
-                mime="application/pdf",
-            )
+                st.download_button(
+                    "Download Report (PDF)",
+                    data=pdf_bytes,
+                    file_name=f"Cyber_Health_Check_Report_{(business_name or 'TBD').replace(' ', '_')}.pdf",
+                    mime="application/pdf",
+                )
 
     except Exception as e:
         st.error(f"Failed to parse/generate report: {e}")
