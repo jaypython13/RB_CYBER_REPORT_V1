@@ -51,8 +51,7 @@ if hibp_file and ssl_file:
             #st.json(ssl)
 
         if st.button("Generate PDF Report"):
-             with st.spinner:
-                st.info("🔐 AI is analysing your data and generating the Cyber Health Check report...")
+             with st.spinner("🔐 AI is analysing HIBP and SSL Labs data and generating the Cyber Health Check report...")
                 time.sleep(5)  # simulate AI processing time
     
                 pdf_bytes = generate_pdf_bytes(
