@@ -56,13 +56,13 @@ if hibp_file and ssl_file:
             status = st.empty()
 
             status.info("🤖 Analysing Have I Been Pwned data...")
-            time.sleep(1.5)
+            time.sleep(2)
 
-            status.info("🔐 Analysing SSL Labs security posture...")
-            time.sleep(1.5)
+            status.info("🔐 Analysing SSL Labs data...")
+            time.sleep(2)
 
             status.info("📄 Generating Cyber Health Check report...")
-            time.sleep(1.5)
+            time.sleep(2)
 
             status.info("📄 Now, your Cyber Health Check Report is ready to download")
             time.sleep(2)
