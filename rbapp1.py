@@ -55,7 +55,7 @@ if hibp_file and ssl_file:
                 #time.sleep(3)  # simulate AI processing time
             status = st.empty()
 
-            status.info("🤖 Analysing Have I Been Pwned data...")
+            status.info("🔐 Analysing Have I Been Pwned data...")
             time.sleep(2)
 
             status.info("🔐 Analysing SSL Labs data...")
