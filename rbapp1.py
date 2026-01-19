@@ -62,10 +62,10 @@ if hibp_file and ssl_file:
             time.sleep(2)
 
             status.info("📄 Generating Cyber Health Check report...")
-            time.sleep(2)
+            #time.sleep(2)
 
             st.success("📄 Now, your Cyber Health Check Report is ready to download")
-            time.sleep(1)
+            #time.sleep(1)
             
             pdf_bytes = generate_pdf_bytes(
                     business_name=business_name.strip() or "TBD",
