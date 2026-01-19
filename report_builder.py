@@ -475,7 +475,7 @@ def generate_pdf_bytes(
 
         detail_table = Table(
             [["Metric", "Value"]] + [[k, v] for (k, v) in f.details],
-            colWidths=[55 * mm, 105 * mm],
+            colWidths=[45 * mm, 105 * mm],
         )
         detail_table.setStyle(
             TableStyle(
