@@ -62,7 +62,7 @@ if hibp_file and ssl_file:
             time.sleep(2)
 
             status.info("📄 Generating Cyber Health Check report...")
-            #time.sleep(2)
+            break
 
             st.success("📄 Now, your Cyber Health Check Report is ready to download")
             #time.sleep(1)
