@@ -128,6 +128,7 @@ def build_findings(hibp: Dict[str, Any], ssl: Dict[str, Any]) -> List[Finding]:
         )
     )
 
+    
     # 2) Website encryption (SSL Labs)
     grade = ssl.get("grade") or "N/A"
     domain = ssl.get("domain") or ssl.get("raw", {}).get("host") or "N/A"
