@@ -121,7 +121,8 @@ def build_findings(hibp: Dict[str, Any], ssl: Dict[str, Any]) -> List[Finding]:
                 ("Email", str(hibp.get("email", "N/A"))),
                 ("Breaches found", str(breaches_found)),
                 ("Pastes found", str(pastes_found)),
-                ("Breaches", ", ".join(breaches) if breaches else "None"),
+                #("Breaches", ", ".join(breaches) if breaches else "None"),
+                ("Breaches", "<br/>".join(breaches) if breaches else "None"),
                 ("Scan date", str(hibp.get("scanned_at", "N/A"))),
             ],
         )
