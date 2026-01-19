@@ -49,7 +49,7 @@ if hibp_file and ssl_file:
 
         #with st.expander("Preview parsed SSL Labs JSON"):
             #st.json(ssl)
-
+        
         if st.button("Generate PDF Report"):
              with st.spinner("🔐 AI is analysing HIBP and SSL Labs data and generating the Cyber Health Check report..."):
                 time.sleep(5)  # simulate AI processing time
