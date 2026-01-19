@@ -54,7 +54,7 @@ if hibp_file and ssl_file:
              with st.spinner("🔐 AI is analysing HIBP and SSL Labs data and generating the Cyber Health Check report..."):
                 time.sleep(5)  # simulate AI processing time
     
-             pdf_bytes = generate_pdf_bytes(
+                 pdf_bytes = generate_pdf_bytes(
                     business_name=business_name.strip() or "TBD",
                     email=email.strip() or "TBD",
                     website=website.strip() or "TBD",
@@ -65,7 +65,7 @@ if hibp_file and ssl_file:
                     logo_path=RB_LOGO_PATH,  # <-- always RB_logo.jpg
                 )
             
-             st.success("📄 Your Cyber Health Check Report is ready to download")
+                 st.success("📄 Your Cyber Health Check Report is ready to download")
                  
                  st.download_button(
                     "Download Report (PDF)",
